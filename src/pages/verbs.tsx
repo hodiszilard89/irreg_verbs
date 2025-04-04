@@ -1,231 +1,102 @@
 import { SimpleGrid, Box, Text, Flex, Button } from '@chakra-ui/react'
 //import { pointerWithin } from '@dnd-kit/core';
-import { motion, Point, useAnimation, useMotionValue } from 'framer-motion'
+import { AnimationControls, motion, Point, useAnimate, useAnimation, useMotionValue } from 'framer-motion'
 import React, { useEffect, useRef, useState } from 'react';
-import { Verb, Word } from '../types/verb';
+
+import { moveTo } from '../utils/move-to';
+import { getNextComp } from '../utils/get-next-comp';
+import { getPointFromRef } from '../utils/get-point-from-ref';
 import { createWord } from '../utils/create-word';
+import { use } from 'framer-motion/m';
+
+
+
+export interface Word{
+  word:string,
+  home?:Point
+}
+
+interface Verb { 
+  I_alak: Word
+  II_alak: Word,
+  III_alak: Word,
+}
+
+
+interface Seged { 
+  I_alak:string
+  II_alak: string,
+  III_alak: string,
+}
+
+// kivinni fileba
+export interface Row {
+  I_ref: React.RefObject<HTMLDivElement | null>,
+  II_ref: React.RefObject<HTMLDivElement | null>,
+  III_ref: React.RefObject<HTMLDivElement | null>
+}
+/**
+ * proba
+ */
+  interface Controls {
+    I_alak: AnimationControls,
+    II_alak: AnimationControls,
+    III_alak: AnimationControls,
+  };
+  
+
 
 
 export const Verbs = () => {
-  //igék
-  const igek: Verb[] = [{
-    I_alak: "see",
-    II_alak: {
-      word: "seem",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    },
-    III_alak: {
-      word: "seen",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    }
-  },
-  {
-    I_alak: "arise",
-    II_alak: {
-      word: "arose",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    },
-    III_alak: {
-      word: "arisen",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    }
-  },
-  {
-    I_alak: "awake",
-    II_alak: {
-      word: "awoke",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    },
-    III_alak: {
-      word: "awoken",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    }
-  },
-  {
-    I_alak: "be",
-    II_alak: {
-      word: "was/were",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    },
-    III_alak: {
-      word: "been",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    }
-  },
-  {
-    I_alak: "bear",
-    II_alak: {
-      word: "bore",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    },
-    III_alak: {
-      word: "borne/born",
-      ref: useRef<HTMLDivElement>(null),
-      targetRef: useRef<HTMLDivElement>(null),
-      control: useAnimation()
-    }
-  }]
 
-  //Point visszadó fv újrahasználható meg kell tartani
-  const getPointFromRef = (ref: React.RefObject<HTMLDivElement | null>): Point => {
-    if (!ref?.current) {
-      return { x: 0, y: 0 }; // Ha nincs érvényes ref, visszaadunk null értékeket
-    }
-    const rect = ref.current?.getBoundingClientRect();
-    return { x: rect?.x ?? 0, y: rect?.y ?? 0 };
-  };
+  //const [verb, setVerb] = useState<Verb[]>([]);
+  
+  const control:Controls[] = []
+  const rows: Row[] | null = []
+  const ref =[] 
+  const verb: Verb[] = []
+
+  for (let i = 0; i < 5; i++) {
+    ref.push(useRef<HTMLDivElement|null>(null))
+    control.push({
+      I_alak:useAnimation(),
+      II_alak:useAnimation(),
+      III_alak:useAnimation()
+    })
 
 
 
-  const getItem = (ref: React.RefObject<HTMLElement>): Verb | null => {
-    return igek.find((ige) => ige.II_alak.ref === ref) ?? null
-  }
+    rows.push({
+      I_ref: useRef<HTMLDivElement>(null),
+      II_ref: useRef<HTMLDivElement>(null),
+      III_ref: useRef<HTMLDivElement>(null)
+    })}
 
-
-
-  const minX = useMotionValue(0)
-  const minY = useMotionValue(0)
-  const targX = useMotionValue(0);
-  const targY = useMotionValue(0);
-  let box: Word = igek[0].II_alak
-  const control = useAnimation();
-  // let targets: React.RefObject<null>[] = []
-  // const boxRef1 = useRef(null);
-  // const boxRef2 = useRef(null);
-  //const [box, setBox] = useState<Word>(createWord())
-
-
-  for (let i = 0; i < igek.length; i++) {
-    igek[i].II_alak.ref = useRef<HTMLDivElement>(null)
-
-    igek[i].III_alak.ref = useRef<HTMLDivElement>(null)
-  }
+  useEffect(()=>{
+    //useAnimation()
+  },[verb])
 
   //célok és kezdő pozicíő mentése
   useEffect(() => {
-    igek.forEach((item) => {
-      if (item.II_alak.ref?.current) {
-        item.II_alak.home = getPointFromRef(item.II_alak.ref)
-        item.III_alak.home = getPointFromRef(item.III_alak.ref)
-      }
-    })
-
+    fetch("/verbs.json")
+    .then((response) => response.json())
+    .then((data:Seged[]) => {
+      data.forEach((data,index)=>{
+        verb.push({
+          I_alak:{word:data.I_alak, home:getPointFromRef()},
+          II_alak:{word:data.II_alak},
+          III_alak:{word:data.III_alak}
+        })
+        }
+      )
+     })
+    .catch((error) => console.error("Hiba a beolvasáskor:", error));
   }, [])
-
-  const distance = (p1: Point, p2: Point) => {
-    const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-    return dist;
-  }
-
-
 
 
   const handelDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, index: number, info: any) => {
-    console.log("index: ",index)
-    const target = event.target as HTMLDivElement
-    // const verb = igek.find((item) =>
-    //   item.II_alak.ref.current === target ||
-    //   item.III_alak.ref.current === target)
-    let verb = igek[index]
-    console.log("verb ", verb)
-    console.log("target ", target.getBoundingClientRect() )
-    if (verb.II_alak.ref.current === target) {
-      console.log("2.alak")
-      //setBox(verb?.II_alak)
-      box = verb.II_alak
-    }
-    if (verb.III_alak.ref.current === target) {
-      box = verb.III_alak
-      console.log("3.alak")
-    }
-    //setBox(verb?.III_alak)
-
-    // console.log(event)
-    // console.log(box.word)
-    // console.log(igek.length)
-    // if (igek[index].II_alak.ref.current) {
-    //   console.log("current 2.alak")
-    //   box = igek[index].II_alak
-    // }
-    // if (igek[index].III_alak.ref.current) {
-    //   console.log("current 3.alak")
-    //   box = igek[index].III_alak
-    // }
-
-
-    // minX.set(igek[0].II_alak.targetRef?.current?.getBoundingClientRect().x ?? 0)
-    // minY.set(igek[0].II_alak.targetRef?.current?.getBoundingClientRect().y ?? 0)
-
-    // //const item = 
-
-    // if (distance({ x: minX.get(), y: minY.get() }, getPointFromRef(box.ref)) >
-    //   distance(getPointFromRef(igek[0].III_alak.targetRef), getPointFromRef(box.ref))) {
-    //   minX.set(igek[0].III_alak.targetRef.current?.getBoundingClientRect().x ?? 0)
-    //   minY.set(igek[0].III_alak.targetRef.current?.getBoundingClientRect().y ?? 0)
-
-    minX.set(getPointFromRef(box.targetRef).x)
-    minX.set(getPointFromRef(box.targetRef).y)
-
-    igek.forEach(point => {
-      if ((distance(getPointFromRef(point.II_alak.targetRef), getPointFromRef(box.ref)) <
-        distance({ x: minX.get(), y: minY.get() }, getPointFromRef(box.ref)))) {
-        minX.set(point.II_alak.targetRef.current?.getBoundingClientRect().x ?? 0)
-        minY.set(point.II_alak.targetRef.current?.getBoundingClientRect().y ?? 0)
-      }
-      if ((distance(getPointFromRef(point.III_alak.targetRef), getPointFromRef(box.ref)) <
-        distance({ x: minX.get(), y: minY.get() }, getPointFromRef(box.ref)))) {
-        minX.set(point.III_alak.targetRef.current?.getBoundingClientRect().x ?? 0)
-        minY.set(point.III_alak.targetRef.current?.getBoundingClientRect().y ?? 0)
-      }
-    })
-
-    if (distance({ x: minX.get(), y: minY.get() }, getPointFromRef(box.ref)) < 50) {
-      console.log(box.home)
-      //1 negyed
-      if (minY.get() <= (box.home?.y ?? 0) && minX.get() <= (box.home?.x ?? 0)) {
-        targX.set(-Math.abs(minX.get() - (box.home?.x ?? 0)))
-        targY.set(-Math.abs(minY.get() - (box.home?.y ?? 0)))
-      }
-      //2.negyed
-      if (minY.get() <= (box.home?.y ?? 0) && minX.get() >= (box.home?.x ?? 0)) {
-        targX.set(Math.abs(minX.get() - (box.home?.x ?? 0)))
-        targY.set(-Math.abs(minY.get() - (box.home?.y ?? 0)))
-      }
-      //3.negyed
-      if (minY.get() >= (box.home?.y ?? 0) && minX.get() >= (box.home?.x ?? 0)) {
-        targX.set(Math.abs(minX.get() - (box.home?.x ?? 0)))
-        targY.set(Math.abs(minY.get() - (box.home?.y ?? 0)))
-      }
-      //4.negyed
-      if (minY.get() >= (box.home?.y ?? 0) && minX.get() <= (box.home?.x ?? 0)) {
-        targX.set(-Math.abs(minX.get() - (box.home?.x ?? 0)))
-        targY.set(Math.abs(minY.get() - (box.home?.y ?? 0)))
-      }
-    }
-    else {
-      targX.set(0)
-      targY.set(0)
-    }
-
-    box?.control.start({ x: targX.get(), y: targY.get() })
+    const target:Point = getNextComp((event.target as HTMLDivElement).getBoundingClientRect(),rows)
+    control[index].I_alak.start({x:target.x, y: target.y});
   }
 
   return (
@@ -234,11 +105,12 @@ export const Verbs = () => {
         <SimpleGrid p={4} gap={5} style={{ border: "yellow, 2px, solid " }}>
           <Text>I alak</Text>
           {
-            igek.map((ige, index, value) => {
+            rows.map((row, index, value) => {
               //return
               return (
                 <Box
                   key={index}
+                  ref={row.I_ref}
                   style={
                     {
                       justifyItems: "initial",
@@ -249,7 +121,7 @@ export const Verbs = () => {
                       borderRadius: '10px',
                       border: "white, 2px, solid ",
                     }}
-                ><Text> {ige.I_alak}</Text>
+                ><Text> </Text>
                 </Box>
               )
             })
@@ -258,12 +130,12 @@ export const Verbs = () => {
         <SimpleGrid p={4} gap={30} style={{ border: "yellow, 2px, solid " }}>
           <Text>II alak</Text>
           {
-            igek.map((ige, index, value) => {
-              //return
+            rows.map((row, index, value) => {
+
               return (
                 <Box
                   key={index}
-                  ref={ige.II_alak.targetRef}
+                  ref={row.II_ref}
                   style={
                     {
 
@@ -282,14 +154,14 @@ export const Verbs = () => {
           }
         </SimpleGrid>
         <SimpleGrid p={4} gap={30} style={{ border: "yellow, 2px, solid " }}>
-          <Text>II alak</Text>
+          <Text>III alak</Text>
           {
-            igek.map((ige, index, value) => {
+            rows.map((row, index, value) => {
               //return
               return (
                 <Box
                   key={index}
-                  ref={ige.III_alak.targetRef}
+                  ref={row.III_ref}
                   style={
                     {
 
@@ -309,23 +181,22 @@ export const Verbs = () => {
         </SimpleGrid>
 
       </Flex>
+
+      {/* IGE KOMPONENSEK */}
       <SimpleGrid border={"green solid 2px"} columns={6} gap={3} >
         {
-          igek.map((item, index) => {
+          verb.map((ige, index) => {
             return (
 
               <>
                 <motion.div
                   drag
                   key={index}
-                  ref={item.II_alak.ref ?? null}
+                  //ref={control[index].I_alak}
                   dragMomentum={false}
                   whileDrag={{ scale: 1 }} // Mozgatás alatt nincs változás
                   onDragEnd={(event, info) => handelDragEnd(event, index, info)}
-                  onClick={(event) => {
-                    control.start({ x: 0, y: 0, transition: { duration: 0.3 } })
-                  }}
-                  animate={item.II_alak.control}
+                  animate={control[index].I_alak}
 
                   style={
                     {
@@ -341,20 +212,20 @@ export const Verbs = () => {
 
                     }}
                 >
-                  <Text>{item.II_alak.word}</Text>
+                  <Text>{ige.I_alak}</Text>
                 </motion.div>
                 {/* 3.alak */}
-                <motion.div
+                {/* <motion.div
                   drag
                   key={index + igek.length + 1}
-                  ref={item.III_alak.ref ?? null}
+                 // ref={item.III_alak.ref ?? null}
                   dragMomentum={false}
                   whileDrag={{ scale: 1 }} // Mozgatás alatt nincs változás
                   onDragEnd={(event, info) => handelDragEnd(event, index, info)}
                   onClick={(event) => {
                     control.start({ x: 0, y: 0, transition: { duration: 0.3 } })
                   }}
-                  animate={item.III_alak.control}
+                 // animate={item.III_alak.control}
 
                   style={
                     {
@@ -370,8 +241,8 @@ export const Verbs = () => {
 
                     }}
                 >
-                  <Text>{item.III_alak.word}</Text>
-                </motion.div>
+                  <Text>{ige.II_akak}</Text>
+                </motion.div> */}
               </>
             )
           })
