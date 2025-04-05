@@ -1,25 +1,23 @@
 [{
-    "I_alak": "see",
-    "II_alak":"seem",
-    "III_alak":"seen"     
+    "word": "see"
+    
   },
   {
-    "I_alak": "arise",
-    "II_alak": "arose",
-    "III_alak": "arisen"
+    "word": "arise"
+   
   },
   {
-    "I_alak":"awake",
-    "II_alak": "awoke",
-    "III_alak": "awoken"
+    "word":"awake"
+    
+  
     },
   {
-    "I_alak": "be",
-    "II_alak":  "was/were",
-    "III_alak": "been"
+    "word": "be"
+   
+    
     },
   {
-    "I_alak": "bear",
-    "II_alak": "bore",
-    "III_alak": "borne/born"
+    "word": "bear"
+   
+    
   }]
