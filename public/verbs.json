@@ -1,23 +1,29 @@
-[{
-    "word": "see"
-    
+[
+  {
+    "id": "1",
+    "I_form": "be",
+    "II_form": "was/were",
+    "III_form": "been"
   },
   {
-    "word": "arise"
-   
+    "id": "2",
+    "I_form": "begin",
+    "II_form": "began",
+    "III_form": "begun"
   },
   {
-    "word":"awake"
-    
-  
-    },
+    "id": "3",
+    "I_form": "break",
+    "II_form": "broke",
+    "III_form": "broken"
+  },
   {
-    "word": "be"
-   
-    
-    },
-  {
-    "word": "bear"
-   
-    
-  }]
+    "id": "4",
+    "I_form": "bring",
+    "II_form": "brought",
+    "III_form": "brought"
+  }
+
+]
+
+

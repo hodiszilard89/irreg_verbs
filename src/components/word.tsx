@@ -5,35 +5,55 @@ import { useEffect, useRef } from 'react';
 
 interface WordProps {
     word: string,
-    // ref: React.RefObject<HTMLDivElement | null>,   
-
-    dragEndHandle: (event: MouseEvent | TouchEvent | PointerEvent, info: any, control: AnimationControls, home: Point) => void;
+    id: number,
+    //mezo?:Point | null
+    ref: React.RefObject<HTMLDivElement | null>
+    localref:React.RefObject<HTMLDivElement | null>
+    dragEndHandle: (
+        event: MouseEvent | TouchEvent | PointerEvent,
+        info: any,
+        control: AnimationControls,
+        home: Point,
+        id: number,
+        referencia: React.RefObject<HTMLDivElement | null>,
+      
+        ) => void;
+   onClick:(localref:React.RefObject<HTMLDivElement | null>, control: AnimationControls,ref:React.RefObject<HTMLDivElement | null>) =>void,
+   dragStartHandle:(referencia:React.RefObject<HTMLDivElement | null>,
+                    localref:React.RefObject<HTMLDivElement | null>) =>void
 }
 
-export const Word = ({ word, dragEndHandle }: WordProps) => {
+export const Word = ({ word, id, dragEndHandle, ref, localref, dragStartHandle, onClick }: WordProps) => {
     const control = useAnimation()
     const homex = useMotionValue(0)
     const homey = useMotionValue(0)
-    const ref: React.RefObject<HTMLDivElement | null> = useRef(null)
+    //const mezo : Point | null = null
+    //const ref: React.RefObject<HTMLDivElement | null> = useRef(null)
     useEffect(() => {
-        homex.set(ref.current?.getBoundingClientRect().x ?? 0)
-        homey.set(ref.current?.getBoundingClientRect().y ?? 0)
+        if (ref) {
+            homex.set(ref.current?.getBoundingClientRect().x ?? 0)
+            homey.set(ref.current?.getBoundingClientRect().y ?? 0)
+        }
     }, [])
 
     return (
         <motion.div
             drag
-            onDragEnd={(event, info) => dragEndHandle(event, info, control, {x:homex.get(), y:homey.get()})}
+            onDragEnd={(event, info) => dragEndHandle(event, info, control, { x: homex.get(), y: homey.get() }, id, ref)}
+            onDragStart={()=>dragStartHandle(ref, localref)}
             ref={ref}
             dragMomentum={false}
             whileDrag={{ scale: 1 }} // Mozgatás alatt nincs változás
+            onDoubleClick={() =>onClick(localref, control, ref)}
             animate={control}
             style={
                 {
-                    display: "flex",
+
+                    gap: "10",
+                    //display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
-                    alignItems: "center",
+                    //alignItems: "center",
                     position: "relative",
                     height: "35px",
                     width: "190px",
