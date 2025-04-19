@@ -16,7 +16,7 @@ export const ContainerForWords = ({ref, free, index}:{ref: React.RefObject<HTMLD
                     borderRadius: '10px',
                     border: "white, 2px, solid ",
                 }}
-        > {free.toString()}
+        > 
         </Box>
     )
 }

@@ -1,4 +1,4 @@
-import { SimpleGrid, Text, Flex } from '@chakra-ui/react'
+import { SimpleGrid, Text, Flex, Button } from '@chakra-ui/react'
 import { AnimationControls, Point } from 'framer-motion'
 import React, { createRef, useEffect, useRef, useState } from 'react';
 import { Word as WordComp } from '../components/word'
@@ -8,10 +8,20 @@ import { getPointFromRef } from '../utils/get-point-from-ref';
 import { distance } from '../utils/distance';
 import { ContainerForWords } from '../components/container-for-words';
 import { rowSetter } from '../utils/row-setter';
+import { WordFactory } from '../utils/word_factory';
+import { a } from 'framer-motion/client';
 
+
+export interface RawWord {
+  id: number,
+  I_form: string,
+  II_form: string,
+  III_form: string
+}
 
 export interface Word {
   word?: string,
+  form?: number,
   id?: number,
   home?: Point
   ref: React.RefObject<HTMLDivElement | null>,
@@ -53,11 +63,13 @@ export const Verbs = () => {
     //Fileból beolvasás
     fetch("/verbs.json")
       .then((response) => response.json())
-      .then((data: Word[]) => {
-        setVerb(data.map(item => ({ ...item, localref: createRef(), ref: createRef() })));
-
+      .then((data: RawWord[]) => {
+        //itt hozzáadtam egyből a refereniciát
+        //setVerb(data.map(item => ({ ...item, localref: createRef(), ref: createRef() })));
+        setVerb(WordFactory(data))
       })
       .catch((error) => console.error("Hiba a beolvasáskor:", error));
+
   }, []);
 
   //célok és kezdő pozicíő mentése
@@ -191,6 +203,68 @@ export const Verbs = () => {
           })
         }
       </SimpleGrid>
+      <Button onClick={() => {
+        const verbsOnTabel: Word[] = verb.filter(verb => verb.localref)
+       
+        const words: (Word | undefined)[] = []
+        rows.map((aRow) => {
+          words.length = 0
+          // ha  a sor  mind a három mezőben van foglalás
+          if (!(aRow.I_field.free || aRow.II_field.free || aRow.III_field.free)) {
+            words.push(verbsOnTabel.find(verb => verb.localref == aRow.I_field.ref ))
+            words.push(verbsOnTabel.find(verb => verb.localref == aRow.II_field.ref))
+            words.push(verbsOnTabel.find(verb => verb.localref == aRow.III_field.ref ))
+          }
+          if ((words[0] && words[1] && words[2] && words[0]?.id == words[1]?.id && words[0]?.id == words[2]?.id)
+                && (words[0].form!<words[1].form!)&&(words[1].form!<words[2].form!)) {
+            aRow.I_field.ref.current!.style.border = "green, 5px, solid"
+            aRow.II_field.ref.current!.style.border = "green, 5px, solid"
+            aRow.III_field.ref.current!.style.border = "green, 5px, solid"
+          } else 
+          if (words[0] && words[1] && words[2]) {
+            aRow.I_field.ref.current!.style.border = "blue, 4px, solid"
+            aRow.II_field.ref.current!.style.border = "blue, 4px, solid"
+            aRow.III_field.ref.current!.style.border = "blue, 4px, solid"
+          }
+        })
+        // verb.filter(verb => verb.localref).map(verb => {
+        //   bo=false
+        //   //belső ciklus
+        //   console.log( rows.find((row) => {
+
+        //     //1. oszlop
+        //     if (!(row.I_field.free) && verb.form == 1 && verb.localref == row.I_field.ref && row.I_field.ref.current) {
+        //       //row.I_field.ref.current.style.border = ("green 5px solid")
+        //       bo=true
+        //     }
+        //     else if (!(row.I_field.free) && verb.localref == row.I_field.ref && row.I_field.ref.current) {
+        //       bo=false 
+        //       //row.I_field.ref.current.style.border = ("yellow 5px solid")
+        //     }
+        //     //2.oszlop
+        //     if (!(row.II_field.free) && verb.form == 2 && verb.localref == row.II_field.ref && row.II_field.ref.current) {
+        //       //row.II_field.ref.current.style.border = ("green 5px solid")
+        //       bo=true
+        //     }
+        //     else if (!(row.II_field.free) && verb.localref == row.II_field.ref && row.II_field.ref.current) {
+        //       //row.II_field.ref.current.style.border = ("yellow 5px solid")
+        //       bo=false
+        //     }
+        //     //3. oszlop
+        //     if (!(row.III_field.free) && verb.form == 3 && verb.localref == row.III_field.ref && row.III_field.ref.current) {
+        //      // row.III_field.ref.current.style.border = ("green 5px solid")
+        //      bo=true
+        //     }
+        //     else if (!(row.III_field.free) && verb.localref == row.III_field.ref && row.III_field.ref.current) {
+        //       //row.III_field.ref.current.style.border = ("yellow 5px solid")
+        //       bo=false
+        //     }
+        //    return bo
+        //   }))
+        //   console.log(bo)
+        // })
+
+      }}>Vizsgálat</Button>
     </SimpleGrid>
   );
 }

@@ -1,6 +1,6 @@
 import { Text } from '@chakra-ui/react'
 import { AnimationControls, motion, Point, useAnimation, useMotionValue } from 'framer-motion'
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 
 interface WordProps {
@@ -56,7 +56,7 @@ export const Word = ({ word, id, dragEndHandle, ref, localref, dragStartHandle, 
                     //alignItems: "center",
                     position: "relative",
                     height: "35px",
-                    width: "190px",
+                    width: "200px",
                     borderRadius: '10px',
                     border: "blue, 2px, dashed ",
 

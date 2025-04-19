@@ -22,8 +22,13 @@
     "I_form": "bring",
     "II_form": "brought",
     "III_form": "brought"
+  },
+  {
+    "id": "5",
+    "I_form": "write",
+    "II_form": "wrote",
+    "III_form": "written"
   }
 
 ]
-
 
