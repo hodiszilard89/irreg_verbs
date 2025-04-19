@@ -1,0 +1,5 @@
+{
+  "env": {
+    "AMPLIFY_MONOREPO_APP_ROOT": "."
+  }
+}
